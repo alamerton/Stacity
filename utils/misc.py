@@ -7,7 +7,6 @@ import random
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, parent_dir)
 
-from utils.generation.call_mimic_iii import call_mimic_iii
 
 NUMBER_OF_QA_PAIRS = 1000
 MODEL_NAME = "gpt-4"
@@ -47,16 +46,6 @@ def calculate_max_tokens(strings, model_name=MODEL_NAME):
         if token_count > max_tokens:
             max_tokens = token_count
     return max_tokens
-
-
-def calculate_max_discharge_summaries(model_name, limit=10):
-    # return the maximum number of discharge summaries you can send
-    # a model
-    biggest_ds_strings = []
-    for i in range(0, limit):
-        strings = call_mimic_iii(NUMBER_OF_QA_PAIRS, i)
-        biggest_ds_strings.append(calculate_max_tokens(strings, model_name))
-    return biggest_ds_strings
 
 
 def select_capability_type(factual_proportion: int, reasoning_proportion: int) -> str:

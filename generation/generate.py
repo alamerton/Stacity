@@ -1,6 +1,4 @@
 from utils.generation.call_gpt import call_gpt
-from utils.generation.call_mimic_iii import call_mimic_iii
-from utils.misc import select_capability_type
 from utils.generation.check_quality_with_gpt import check_quality_with_gpt
 from datetime import datetime
 import sys
