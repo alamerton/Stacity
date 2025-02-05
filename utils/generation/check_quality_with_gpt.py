@@ -1,8 +1,7 @@
 import os
 import time
 from utils.generation.prompts import (
-    get_reasoning_qual_check_prompt,
-    get_factual_qual_check_prompt,
+    get_qual_check_prompt,
 )
 from openai import AzureOpenAI
 from dotenv import load_dotenv
@@ -11,7 +10,7 @@ from azure.core.exceptions import HttpResponseError
 load_dotenv()
 
 
-def check_quality_with_gpt(qa_string, model_name, capability_type):
+def check_quality_with_gpt(qa_string, model_name):
     max_retries = 10
     retry_delay = 5
 
@@ -21,12 +20,7 @@ def check_quality_with_gpt(qa_string, model_name, capability_type):
         api_version=os.getenv("AZURE_API_VERSION"),
     )
 
-    if capability_type == "Factual QA":
-        system_message, user_prompt = get_reasoning_qual_check_prompt(qa_string)
-    elif capability_type == "Reasoning QA":
-        system_message, user_prompt = get_factual_qual_check_prompt(qa_string)
-    else:
-        raise ValueError("Invalid capability type passed to check_quality_with_gpt")
+    system_message, user_prompt = get_qual_check_prompt(qa_string)
 
     for i in range(0, max_retries):
         try:
