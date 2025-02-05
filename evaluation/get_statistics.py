@@ -4,6 +4,8 @@ analysis on the datasets to get scores for each analysis method, saving
 the analysis results to a CSV file.
 """
 
+from evaluation.benchmark import get_bleu
+
 import pandas as pd
 from datetime import datetime
 import sys
@@ -13,7 +15,6 @@ from lexicalrichness import lexicalrichness
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, parent_dir)
 
-from evaluation.benchmark import get_bleu
 
 DATASET_PATH = "data/processing/cqual-small.csv"
 

@@ -1,3 +1,6 @@
+from utils.evaluation.annotate_with_gpt import annotate_with_gpt
+from utils.misc import save_dataset
+
 import pandas as pd
 import os
 import sys
@@ -6,8 +9,6 @@ from tqdm import tqdm
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, parent_dir)
-from utils.evaluation.annotate_with_gpt import annotate_with_gpt
-from utils.misc import save_dataset
 
 DATASET_PATH = "data/processing/matching-pairs/dataset_processed_overwrite.csv"
 CHECKPOINT = 0
