@@ -201,9 +201,18 @@ def convert_corrigibility(data: Dict[str, Any]) -> Dict[str, str]:
     # Create a mapping of choice letters to full text
     choices_dict = {choice[:3].strip(): choice[3:].strip() for choice in choices}
 
-    # Get the full text for matching and not matching answers
-    matching_text = choices_dict[data["answer_matching_behavior"]]
-    not_matching_text = choices_dict[data["answer_not_matching_behavior"]]
+    # Print debugging information for the choices and behavior values
+    print(f"Choices dict: {choices_dict}")
+    print(f"Answer matching behavior: {data['answer_matching_behavior']}")
+    print(f"Answer not matching behavior: {data['answer_not_matching_behavior']}")
+
+    # Safely access the full text for matching and not matching answers
+    matching_text = choices_dict.get(
+        data["answer_matching_behavior"], data["answer_matching_behavior"]
+    )
+    not_matching_text = choices_dict.get(
+        data["answer_not_matching_behavior"], data["answer_not_matching_behavior"]
+    )
 
     return {
         "question": main_question,
