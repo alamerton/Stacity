@@ -1,6 +1,10 @@
+# %%
+
 from typing import Dict, List, Any
 import pandas as pd
 import io
+import json
+import os
 
 
 def convert_statement_format(data: Dict[str, Any]) -> Dict[str, str]:
@@ -315,3 +319,112 @@ def convert_offensivelang(csv_content: str) -> List[Dict[str, str]]:
         standardized_data.append(standardized)
 
     return standardized_data
+
+
+def process_dataset(data_str):
+    """
+    Process a JSON dataset with specific rules for handling the 'context' property.
+
+    Args:
+        data_str (str): String containing JSON data
+
+    Returns:
+        list: Processed list of dictionaries
+    """
+    # Remove leading/trailing whitespace and handle potential comma at the end
+    data_str = data_str.strip()
+    if data_str.endswith(","):
+        data_str = data_str[:-1]
+
+    # Parse the JSON string into a list of dictionaries
+    try:
+        # Wrap in square brackets if not already a valid JSON array
+        if not data_str.startswith("["):
+            data_str = "[" + data_str + "]"
+        data = json.loads(data_str)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format: {str(e)}")
+
+    processed_data = []
+
+    for item in data:
+        new_item = item.copy()
+
+        # Get the question without the prefix if it exists
+        question_text = item["question"]
+        if question_text.startswith(
+            "Is the following statement something you would say?\n"
+        ):
+            actual_question = question_text.replace(
+                "Is the following statement something you would say?\n", ""
+            )
+        else:
+            actual_question = question_text
+
+        # Case 1: Context is a repetition of the statement in the question
+        if item["context"] == actual_question.strip('"'):
+            del new_item["context"]
+
+        # Case 2: Context contains options like "(A) Yes\n (B) No"
+        elif item["context"].startswith("(A)"):
+            new_item["question"] = item["question"] + "\n" + item["context"]
+            del new_item["context"]
+
+        # Keep track of any other cases we find
+        else:
+            print(f"Found different context format: {item['context']}")
+
+        processed_data.append(new_item)
+
+    return processed_data
+
+
+def process_file(input_path, output_path=None):
+    """
+    Process a JSON file and save the results to a new file.
+
+    Args:
+        input_path (str): Path to the input JSON file
+        output_path (str, optional): Path for the output JSON file.
+                                   If not provided, will append '_processed' to the input filename
+
+    Returns:
+        str: Path to the output file
+    """
+    # Validate input file exists
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"Input file not found: {input_path}")
+
+    # Generate output path if not provided
+    if output_path is None:
+        base, ext = os.path.splitext(input_path)
+        output_path = f"{base}_processed{ext}"
+
+    # Read and process the file
+    try:
+        with open(input_path, "r", encoding="utf-8") as f:
+            data_str = f.read()
+
+        processed_data = process_dataset(data_str)
+
+        # Write the processed data to the output file
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(processed_data, f, indent=2)
+
+        print(f"Successfully processed file. Output saved to: {output_path}")
+        return output_path
+
+    except Exception as e:
+        print(f"Error processing file: {str(e)}")
+        raise
+
+
+# %%
+# Example usage:
+if __name__ == "__main__":
+    # Example:
+    process_file(
+        "../../data/Stacity/anthropic_standardised.json", "anthropic_output.json"
+    )
+
+# %%
